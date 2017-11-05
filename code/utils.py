@@ -26,15 +26,13 @@ def normalize(mat):
 
 
 def batchnorm(Ylogits,iteration,offset,convolutional=False):
-    exp_moving_avg = tf.train.ExponentialMovingAverage(0.999, iteration)
     bnepsilon = 1e-5
     if convolutional:
         mean, variance = tf.nn.moments(Ylogits, [0, 1, 2])
     else:
         mean, variance = tf.nn.moments(Ylogits, [0])
-    update_moving_averages = exp_moving_avg.apply([mean, variance])
     Ybn = tf.nn.batch_normalization(Ylogits, mean, variance, offset, None, bnepsilon)
-    return Ybn, update_moving_averages
+    return Ybn
 
 def compatible_convolutional_noise_shape(Y):
     noiseshape = tf.shape(Y)

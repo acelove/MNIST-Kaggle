@@ -8,7 +8,6 @@ class CNN(object):
     def __init__(self,num_of_labels):
         self.X = tf.placeholder(tf.float32,[None,784])
         self.y_ = tf.placeholder(tf.int32,[None])
-        self.iter = tf.placeholder(tf.int32)
         self.keep_prob = tf.placeholder(tf.float32)
         self.keep_prob_conv = tf.placeholder(tf.float32)
         self.lr = tf.placeholder(tf.float32)
@@ -22,7 +21,7 @@ class CNN(object):
             W_conv1 = weight_variable([6,6,1,24])
             b_conv1 = bias_variable([24])
             h_conv1 = conv2d(x_image,W_conv1)
-            h_bn_conv1,update_ema1 = batchnorm(h_conv1,self.iter,b_conv1,convolutional=True)
+            h_bn_conv1 = batchnorm(h_conv1,b_conv1,convolutional=True)
             h_act_conv1 = tf.nn.relu(h_bn_conv1)
             h_drop_conv1 = tf.nn.dropout(h_act_conv1,self.keep_prob_conv,compatible_convolutional_noise_shape(h_act_conv1))
 
@@ -33,7 +32,7 @@ class CNN(object):
             b_conv2 = bias_variable([48])
             h_conv2 = conv2d(h_drop_conv1,W_conv2)
             h_pool_conv2 = max_pool_2x2(h_conv2)
-            h_bn_conv2,update_ema2 = batchnorm(h_pool_conv2,self.iter,b_conv2,convolutional=True)
+            h_bn_conv2 = batchnorm(h_pool_conv2,b_conv2,convolutional=True)
             h_act_conv2 = tf.nn.relu(h_bn_conv2)
             h_drop_conv2 = tf.nn.dropout(h_act_conv2,self.keep_prob_conv, compatible_convolutional_noise_shape(h_act_conv2)) 
 
@@ -44,7 +43,7 @@ class CNN(object):
             b_conv3 = bias_variable([64])
             h_conv3 = conv2d(h_drop_conv2,W_conv3)
             h_pool_conv3 = max_pool_2x2(h_conv3)
-            h_bn_conv3,update_ema3 = batchnorm(h_pool_conv3,self.iter,b_conv3,convolutional=True)
+            h_bn_conv3 = batchnorm(h_pool_conv3,b_conv3,convolutional=True)
             h_act_conv3 = tf.nn.relu(h_bn_conv3)
             h_drop_conv3 = tf.nn.dropout(h_act_conv3,self.keep_prob_conv,compatible_convolutional_noise_shape(h_act_conv3))
 
@@ -54,7 +53,7 @@ class CNN(object):
             W_fc1 = weight_variable([7*7*64,256])
             b_fc1 = bias_variable([256])
             h_fc1 = tf.matmul(tf.reshape(h_drop_conv3,[-1,7*7*64]),W_fc1)
-            h_bn_fc1,update_ema4 = batchnorm(h_fc1,self.iter,b_fc1)
+            h_bn_fc1 = batchnorm(h_fc1,b_fc1)
             h_act_fc1 = tf.nn.relu(h_bn_fc1)
             h_drop_fc1 = tf.nn.dropout(h_act_fc1,self.keep_prob)
 
@@ -66,7 +65,6 @@ class CNN(object):
             h_fc2 = tf.matmul(h_drop_fc1,W_fc2)+b_fc2
 
 
-        self.update_ema = tf.group(update_ema1, update_ema2, update_ema3, update_ema4)
         self.predict = tf.argmax(tf.nn.softmax(h_fc2),1)
         correct_prediction = tf.cast(tf.equal(self.predict, tf.argmax(y_one_hot, 1)),tf.float32)
         self.accuracy = tf.reduce_mean(correct_prediction)
@@ -88,15 +86,7 @@ class CNN(object):
                      self.lr:learning_rate
                  }
                 )
-        sess.run(self.update_ema, 
-                 feed_dict={
-                     self.X : batch_X,
-                     self.y_: batch_y,
-                     self.iter: iter,
-                     self.keep_prob:1.0,
-                     self.keep_prob_conv:1.0
-                 }
-                )
+
     def get_loss(self,sess,train_X,train_y):
         return sess.run(self.loss,
                         feed_dict={
