@@ -3,9 +3,9 @@
 from model import *
 import pandas
 if __name__ == "__main__":
-    test_X = binary(pandas.read_csv('../input/test.csv').values)
+    test_X = normalize(pandas.read_csv('../input/test.csv').values)
 
-    cnn = CNN(10,0.5,1e-4)
+    cnn = CNN(num_of_labels=10)
 
     with tf.Session() as sess:
         saver = tf.train.Saver()
