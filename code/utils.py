@@ -21,5 +21,5 @@ def max_pool_2x2(x):
   return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
                         strides=[1, 2, 2, 1], padding='SAME')
 
-def binary(mat):
-  return (mat>128).astype(np.float32)
+def normalize(mat):
+  return mat.astype(np.float32)/256
