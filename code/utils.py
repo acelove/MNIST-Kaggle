@@ -25,7 +25,7 @@ def normalize(mat):
   return mat.astype(np.float32)/256
 
 
-def batchnorm(Ylogits,iteration,offset,convolutional=False):
+def batchnorm(Ylogits,offset,convolutional=False):
     bnepsilon = 1e-5
     if convolutional:
         mean, variance = tf.nn.moments(Ylogits, [0, 1, 2])
